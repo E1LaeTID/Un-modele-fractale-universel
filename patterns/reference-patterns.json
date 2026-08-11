@@ -1,0 +1,211 @@
+{
+  "name": "reference-pattern",
+  "description": "Motif source de référence défini proportionnellement à une longueur variable et translatable dans un espace 2D.",
+
+  "parameters": {
+    "length": {
+      "symbol": "L",
+      "description": "Longueur de référence du motif M0-M20."
+    },
+
+    "offsetX": {
+      "symbol": "X0",
+      "description": "Translation horizontale depuis le coin supérieur gauche."
+    },
+
+    "offsetY": {
+      "symbol": "Y0",
+      "description": "Translation verticale depuis le coin supérieur gauche."
+    }
+  },
+
+  "screenTransform": {
+    "x": "offsetX + normalizedX * length",
+    "y": "offsetY - normalizedY * length"
+  },
+
+  "origin": "M0",
+  "endPoint": "M20",
+
+  "symmetry": {
+    "type": "vertical",
+    "axisNormalizedX": "1/2",
+    "axisFormula": "offsetX + length / 2",
+    "transform": {
+      "x": "1 - x",
+      "y": "y"
+    }
+  },
+
+  "points": [
+    {
+      "id": "M0",
+      "normalized": ["0", "0"],
+      "x": "offsetX",
+      "y": "offsetY"
+    },
+
+    {
+      "id": "M1",
+      "normalized": ["1/32", "1/5"],
+      "x": "offsetX + length / 32",
+      "y": "offsetY - length / 5"
+    },
+
+    {
+      "id": "M2",
+      "normalized": ["1/16", "1/6"],
+      "x": "offsetX + length / 16",
+      "y": "offsetY - length / 6"
+    },
+
+    {
+      "id": "M3",
+      "normalized": ["3/8", "1/6"],
+      "x": "offsetX + 3 * length / 8",
+      "y": "offsetY - length / 6"
+    },
+
+    {
+      "id": "M4",
+      "normalized": ["3/8", "5/12"],
+      "x": "offsetX + 3 * length / 8",
+      "y": "offsetY - 5 * length / 12"
+    },
+
+    {
+      "id": "M5",
+      "normalized": ["1/8", "5/12"],
+      "x": "offsetX + length / 8",
+      "y": "offsetY - 5 * length / 12"
+    },
+
+    {
+      "id": "M6",
+      "normalized": ["1/16", "1/2"],
+      "x": "offsetX + length / 16",
+      "y": "offsetY - length / 2"
+    },
+
+    {
+      "id": "M7",
+      "normalized": ["1/8", "7/12"],
+      "x": "offsetX + length / 8",
+      "y": "offsetY - 7 * length / 12"
+    },
+
+    {
+      "id": "M8",
+      "normalized": ["3/8", "7/12"],
+      "x": "offsetX + 3 * length / 8",
+      "y": "offsetY - 7 * length / 12"
+    },
+
+    {
+      "id": "M9",
+      "normalized": ["7/16", "1/2"],
+      "x": "offsetX + 7 * length / 16",
+      "y": "offsetY - length / 2"
+    },
+
+    {
+      "id": "M10",
+      "normalized": ["1/2", "1/2"],
+      "x": "offsetX + length / 2",
+      "y": "offsetY - length / 2"
+    },
+
+    {
+      "id": "M11",
+      "normalized": ["9/16", "1/2"],
+      "x": "offsetX + 9 * length / 16",
+      "y": "offsetY - length / 2"
+    },
+
+    {
+      "id": "M12",
+      "normalized": ["5/8", "7/12"],
+      "x": "offsetX + 5 * length / 8",
+      "y": "offsetY - 7 * length / 12"
+    },
+
+    {
+      "id": "M13",
+      "normalized": ["7/8", "7/12"],
+      "x": "offsetX + 7 * length / 8",
+      "y": "offsetY - 7 * length / 12"
+    },
+
+    {
+      "id": "M14",
+      "normalized": ["15/16", "1/2"],
+      "x": "offsetX + 15 * length / 16",
+      "y": "offsetY - length / 2"
+    },
+
+    {
+      "id": "M15",
+      "normalized": ["7/8", "5/12"],
+      "x": "offsetX + 7 * length / 8",
+      "y": "offsetY - 5 * length / 12"
+    },
+
+    {
+      "id": "M16",
+      "normalized": ["5/8", "5/12"],
+      "x": "offsetX + 5 * length / 8",
+      "y": "offsetY - 5 * length / 12"
+    },
+
+    {
+      "id": "M17",
+      "normalized": ["5/8", "1/6"],
+      "x": "offsetX + 5 * length / 8",
+      "y": "offsetY - length / 6"
+    },
+
+    {
+      "id": "M18",
+      "normalized": ["15/16", "1/6"],
+      "x": "offsetX + 15 * length / 16",
+      "y": "offsetY - length / 6"
+    },
+
+    {
+      "id": "M19",
+      "normalized": ["31/32", "1/5"],
+      "x": "offsetX + 31 * length / 32",
+      "y": "offsetY - length / 5"
+    },
+
+    {
+      "id": "M20",
+      "normalized": ["1", "0"],
+      "x": "offsetX + length",
+      "y": "offsetY"
+    }
+  ],
+
+  "segments": [
+    ["M0", "M1"],
+    ["M1", "M2"],
+    ["M2", "M3"],
+    ["M3", "M4"],
+    ["M4", "M5"],
+    ["M5", "M6"],
+    ["M6", "M7"],
+    ["M7", "M8"],
+    ["M8", "M9"],
+    ["M9", "M10"],
+    ["M10", "M11"],
+    ["M11", "M12"],
+    ["M12", "M13"],
+    ["M13", "M14"],
+    ["M14", "M15"],
+    ["M15", "M16"],
+    ["M16", "M17"],
+    ["M17", "M18"],
+    ["M18", "M19"],
+    ["M19", "M20"]
+  ]
+}
