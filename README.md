@@ -1,47 +1,41 @@
-## Modèle géométrique
+# Un modèle fractale universel
 
-Le motif est défini relativement à une longueur de référence `length = L`.
+Ce repository présente une méthode générique de construction de fractales à partir d'un motif source défini comme une chaîne ordonnée de segments.
 
-Chaque point `Mi` est représenté par deux coefficients normalisés :
+L'objectif est de proposer une représentation géométrique indépendante du langage de programmation, puis d'en montrer plusieurs implémentations graphiques.
 
-\[
-M_i = (\alpha_i,\beta_i)
-\]
+Les premières implémentations prévues sont :
 
-Les coordonnées réelles sont obtenues par changement d'échelle :
+- C++ avec SFML 3 ;
+- Python avec Turtle.
 
-\[
-x_i = \alpha_i L
-\]
+Le même motif source est utilisé dans chaque langage afin de montrer que la logique de construction fractale peut être séparée du moteur de rendu.
 
-\[
-y_i = \beta_i L
-\]
+---
 
-Le motif peut ensuite être placé dans une surface graphique à l'aide d'une
-translation `(offsetX, offsetY)`.
+## 1. Principe général
 
-Pour un système graphique dont l'origine est située dans le coin supérieur
-gauche :
+La construction repose sur cinq étapes principales.
 
-\[
-X_i = offsetX + \alpha_i L
-\]
+1. Définir un motif source.
+2. Décomposer le motif en une chaîne ordonnée de points et de segments.
+3. Normaliser le motif relativement à une longueur de référence `length`.
+4. Remplacer chaque segment par une copie transformée du motif source.
+5. Répéter récursivement cette transformation.
 
-\[
-Y_i = offsetY - \beta_i L
-\]
-
-Ainsi, le motif est indépendant de sa résolution d'affichage.
-
-Modifier `length` change son échelle, tandis que modifier `offsetX` et
-`offsetY` change sa position sans modifier sa géométrie.
-
-### Exemple
-
-Pour :
+Le processus général peut être résumé ainsi :
 
 ```text
-length  = 600
-offsetX = 100
-offsetY = 500
+Motif source
+    ↓
+Décomposition en points et segments
+    ↓
+Normalisation
+    ↓
+Transformation
+    ↓
+Substitution segment par segment
+    ↓
+Itération
+    ↓
+Fractale
