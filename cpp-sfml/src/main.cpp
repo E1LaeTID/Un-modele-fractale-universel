@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 
+#include <cstdint>
 #include <filesystem>
 #include <iostream>
 #include <optional>
@@ -12,76 +13,97 @@
 #include "FractalGenerator.hpp"
 #include "Renderer.hpp"
 
+
 // =========================================================
-// PARAMETRES PERSONNALISABLES
+// CONFIGURATION DU PROGRAMME
 // =========================================================
 //
-// Ces valeurs peuvent être modifiées sans toucher
-// au moteur fractal.
+// Pour changer de motif fractal :
 //
-// Le motif lui-même NE DOIT PAS être défini ici.
-// Pour changer de motif, remplacer simplement le fichier
-// JSON contenu dans le dossier :
+// 1. supprimer le JSON actuellement présent dans patterns/
+// 2. placer un nouveau fichier .json dans patterns/
+// 3. relancer FractalDemo.exe
 //
-//      patterns/
+// AUCUNE RECOMPILATION N'EST NECESSAIRE.
+//
+// Le motif est automatiquement :
+//
+// - chargé
+// - généré
+// - redimensionné
+// - centré
 //
 // =========================================================
 
-// Taille du motif affiché dans la fenêtre.
-constexpr float DISPLAY_LENGTH = 700.f;
 
-// Position du point d'origine M0 dans la fenêtre.
-constexpr float OFFSET_X = 250.f;
-constexpr float OFFSET_Y = 750.f;
+// ---------------------------------------------------------
+// Fenêtre
+// ---------------------------------------------------------
 
-// Première itération affichée.
+constexpr unsigned int WINDOW_WIDTH = 1200;
+constexpr unsigned int WINDOW_HEIGHT = 900;
+
+
+// Marge minimale conservée autour de la fractale.
+constexpr float DISPLAY_MARGIN = 70.f;
+
+
+// ---------------------------------------------------------
+// Animation
+// ---------------------------------------------------------
+
 constexpr unsigned int MIN_ITERATION = 1;
 
-// Limite théorique disponible dans cette démonstration.
+
+// Limite théorique.
 //
-// ATTENTION :
-// avec un motif de 20 segments :
-//
-// ordre 4 =      160 000 segments
-// ordre 5 =    3 200 000 segments
-// ordre 6 =   64 000 000 segments
-//
-// L'ordre 6 nécessite un moteur de rendu plus optimisé.
+// La limite réellement affichable dépend du nombre de
+// segments présents dans le motif source.
 constexpr unsigned int MAX_ITERATION = 6;
 
-// Durée d'affichage de chaque niveau.
+
+// Temps entre deux niveaux.
 constexpr float ITERATION_DURATION_SECONDS = 2.f;
 
 
+// Protection mémoire / performances.
+constexpr std::uint64_t SAFE_SEGMENT_LIMIT =
+    4'000'000;
+
+
 // =========================================================
-// RECHERCHE AUTOMATIQUE DU FICHIER JSON
-// =========================================================
-//
-// L'utilisateur doit placer UN SEUL fichier .json dans
-// le dossier patterns.
-//
-// Cela permet de remplacer le motif sans modifier main.cpp.
-//
+// RECHERCHE AUTOMATIQUE DU JSON
 // =========================================================
 
 std::filesystem::path findPatternFile()
 {
     const std::filesystem::path patternsDirectory =
-        std::filesystem::path(PROJECT_SOURCE_DIR_PATH)
+        std::filesystem::path(
+            PROJECT_SOURCE_DIR_PATH
+        )
         / "patterns";
+
 
     std::vector<std::filesystem::path> jsonFiles;
 
-    if (!std::filesystem::exists(patternsDirectory))
+
+    if (
+        !std::filesystem::exists(
+            patternsDirectory
+        )
+    )
     {
         throw std::runtime_error(
             "Le dossier patterns est introuvable."
         );
     }
 
+
     for (
         const auto& entry :
-        std::filesystem::directory_iterator(patternsDirectory)
+        std::filesystem::directory_iterator(
+            patternsDirectory
+        )
     )
     {
         if (
@@ -90,9 +112,12 @@ std::filesystem::path findPatternFile()
             entry.path().extension() == ".json"
         )
         {
-            jsonFiles.push_back(entry.path());
+            jsonFiles.push_back(
+                entry.path()
+            );
         }
     }
+
 
     if (jsonFiles.empty())
     {
@@ -100,6 +125,7 @@ std::filesystem::path findPatternFile()
             "Aucun fichier JSON trouve dans patterns/."
         );
     }
+
 
     if (jsonFiles.size() > 1)
     {
@@ -109,17 +135,13 @@ std::filesystem::path findPatternFile()
         );
     }
 
+
     return jsonFiles.front();
 }
 
 
 // =========================================================
-// CALCUL DU NOMBRE THEORIQUE DE SEGMENTS
-// =========================================================
-//
-// Permet d'avertir l'utilisateur avant de demander
-// une itération extrêmement coûteuse.
-//
+// ESTIMATION DU NOMBRE DE SEGMENTS
 // =========================================================
 
 std::uint64_t estimateSegmentCount(
@@ -129,10 +151,16 @@ std::uint64_t estimateSegmentCount(
 {
     std::uint64_t result = 1;
 
-    for (unsigned int i = 0; i < iteration; ++i)
+
+    for (
+        unsigned int i = 0;
+        i < iteration;
+        ++i
+    )
     {
         result *= segmentsPerPattern;
     }
+
 
     return result;
 }
@@ -146,20 +174,25 @@ int main()
 {
     std::cout
         << "=====================================\n"
-        << " Universal Fractal Model - SFML\n"
+        << " Universal Fractal Model - SFML 3\n"
         << "=====================================\n\n";
 
+
     // -----------------------------------------------------
-    // 1. DETECTION DU MOTIF JSON
+    // 1. RECHERCHE DU JSON
     // -----------------------------------------------------
 
     std::filesystem::path patternPath;
 
+
     try
     {
-        patternPath = findPatternFile();
+        patternPath =
+            findPatternFile();
     }
-    catch (const std::exception& error)
+    catch (
+        const std::exception& error
+    )
     {
         std::cerr
             << "Erreur : "
@@ -171,19 +204,25 @@ int main()
         return 1;
     }
 
+
     std::cout
         << "Motif source : "
-        << patternPath.string()
+        << patternPath.filename().string()
         << '\n';
 
 
     // -----------------------------------------------------
-    // 2. CHARGEMENT DU DICTIONNAIRE
+    // 2. CHARGEMENT DU MOTIF
     // -----------------------------------------------------
 
     Pattern pattern;
 
-    if (!pattern.loadFromJson(patternPath.string()))
+
+    if (
+        !pattern.loadFromJson(
+            patternPath.string()
+        )
+    )
     {
         std::cerr
             << "Impossible de charger le motif source.\n";
@@ -193,8 +232,10 @@ int main()
         return 1;
     }
 
+
     const std::size_t pointCount =
         pattern.getPoints().size();
+
 
     if (pointCount < 2)
     {
@@ -204,13 +245,16 @@ int main()
         return 1;
     }
 
+
     const std::size_t segmentsPerPattern =
         pointCount - 1;
+
 
     std::cout
         << "Points : "
         << pointCount
         << '\n';
+
 
     std::cout
         << "Segments du motif : "
@@ -219,53 +263,62 @@ int main()
 
 
     // -----------------------------------------------------
-    // 3. CREATION DE LA FENETRE SFML
+    // 3. FENETRE SFML
     // -----------------------------------------------------
 
     sf::RenderWindow window(
-        sf::VideoMode({1200, 900}),
+        sf::VideoMode(
+            {
+                WINDOW_WIDTH,
+                WINDOW_HEIGHT
+            }
+        ),
         "Universal Fractal Model"
     );
+
 
     window.setFramerateLimit(60);
 
 
     // -----------------------------------------------------
-    // 4. INITIALISATION DE L'ANIMATION
+    // 4. ANIMATION
     // -----------------------------------------------------
 
     unsigned int iteration =
         MIN_ITERATION;
+
 
     const sf::Time iterationDuration =
         sf::seconds(
             ITERATION_DURATION_SECONDS
         );
 
+
     sf::Clock iterationClock;
 
 
     // -----------------------------------------------------
-    // Fonction locale permettant de générer un niveau.
+    // Fonction locale de génération
     // -----------------------------------------------------
 
     auto generateIteration =
         [&](unsigned int level)
         -> std::vector<Segment>
     {
-        const std::uint64_t estimatedSegments =
+        const std::uint64_t estimated =
             estimateSegmentCount(
                 segmentsPerPattern,
                 level
             );
 
+
         std::cout
             << "Iteration "
             << level
             << " : "
-            << estimatedSegments
-            << " segments"
-            << '\n';
+            << estimated
+            << " segments\n";
+
 
         return FractalGenerator::generate(
             pattern.getPoints(),
@@ -275,18 +328,25 @@ int main()
 
 
     // -----------------------------------------------------
-    // 5. GENERATION DU PREMIER NIVEAU
+    // 5. PREMIER NIVEAU
     // -----------------------------------------------------
 
     std::vector<Segment> fractal =
-        generateIteration(iteration);
+        generateIteration(
+            iteration
+        );
+
 
     std::vector<Segment> screenSegments =
-        Transform::toScreen(
+        Transform::fitToScreen(
             fractal,
-            DISPLAY_LENGTH,
-            OFFSET_X,
-            OFFSET_Y
+            static_cast<float>(
+                WINDOW_WIDTH
+            ),
+            static_cast<float>(
+                WINDOW_HEIGHT
+            ),
+            DISPLAY_MARGIN
         );
 
 
@@ -314,6 +374,7 @@ int main()
                 window.close();
             }
 
+
             if (
                 const auto* keyPressed =
                     event->getIf<
@@ -321,7 +382,6 @@ int main()
                     >()
             )
             {
-                // Echap ferme la démonstration.
                 if (
                     keyPressed->scancode ==
                     sf::Keyboard::Scancode::Escape
@@ -334,7 +394,7 @@ int main()
 
 
         // -------------------------------------------------
-        // 7. PASSAGE AUTOMATIQUE AU NIVEAU SUIVANT
+        // CHANGEMENT AUTOMATIQUE DE NIVEAU
         // -------------------------------------------------
 
         if (
@@ -344,91 +404,90 @@ int main()
         {
             iterationClock.restart();
 
+
             ++iteration;
 
-            // Boucle infinie :
-            //
-            // 1 → 2 → 3 → ... → MAX → 1 → ...
-            //
-            if (iteration > MAX_ITERATION)
+
+            if (
+                iteration > MAX_ITERATION
+            )
             {
                 iteration =
                     MIN_ITERATION;
             }
 
-            const std::uint64_t estimatedSegments =
+
+            const std::uint64_t estimated =
                 estimateSegmentCount(
                     segmentsPerPattern,
                     iteration
                 );
 
-            // -------------------------------------------------
-            // SECURITE
-            // -------------------------------------------------
-            //
-            // Cette architecture stocke tous les segments
-            // en mémoire.
-            //
-            // Au-delà de quelques millions de segments,
-            // le rendu devient très coûteux.
-            //
-            // On autorise le modèle jusqu'à 6, mais on évite
-            // ici d'essayer de matérialiser 64 millions de
-            // segments avec le renderer pédagogique actuel.
-            //
-            // -------------------------------------------------
 
-            constexpr std::uint64_t SAFE_SEGMENT_LIMIT =
-                4'000'000;
+            // ---------------------------------------------
+            // Limite de sécurité
+            // ---------------------------------------------
 
             if (
-                estimatedSegments
-                > SAFE_SEGMENT_LIMIT
+                estimated >
+                SAFE_SEGMENT_LIMIT
             )
             {
                 std::cout
                     << "Iteration "
                     << iteration
-                    << " ignoree pour ce renderer : "
-                    << estimatedSegments
+                    << " ignoree : "
+                    << estimated
                     << " segments.\n";
 
                 continue;
             }
 
 
-            // -------------------------------------------------
-            // GENERATION DU NOUVEAU NIVEAU
-            // -------------------------------------------------
+            // ---------------------------------------------
+            // Nouvelle fractale
+            // ---------------------------------------------
 
             fractal =
                 generateIteration(
                     iteration
                 );
 
+
+            // ---------------------------------------------
+            // Ajustement automatique
+            // ---------------------------------------------
+
             screenSegments =
-                Transform::toScreen(
+                Transform::fitToScreen(
                     fractal,
-                    DISPLAY_LENGTH,
-                    OFFSET_X,
-                    OFFSET_Y
+                    static_cast<float>(
+                        WINDOW_WIDTH
+                    ),
+                    static_cast<float>(
+                        WINDOW_HEIGHT
+                    ),
+                    DISPLAY_MARGIN
                 );
         }
 
 
         // -------------------------------------------------
-        // 8. AFFICHAGE
+        // RENDU
         // -------------------------------------------------
 
         window.clear();
+
 
         Renderer::drawSegments(
             window,
             screenSegments
         );
 
+
         window.display();
     }
+
 
     return 0;
 }
