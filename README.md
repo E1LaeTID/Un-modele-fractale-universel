@@ -2,11 +2,11 @@
 
 Méthode générique de construction de fractales à partir d'un **motif source composé d'une chaîne ordonnée de segments**.
 
-Ce repository présente une représentation géométrique indépendante du langage de programmation. Le même modèle pourra ensuite être exploité pour construire et animer une fractale avec différentes technologies, notamment :
+Ce repository présente une représentation géométrique indépendante du langage de programmation. Le même modèle peut être exploité pour construire et animer une fractale avec différentes technologies, notamment :
 
-- **C++ / SFML**
-- **Python / Turtle**
-- **JavaScript**
+* **C++ / SFML 3**
+* **Python / Turtle**
+* **JavaScript**
 
 L'objectif est de séparer la **définition mathématique du motif** de son **implémentation graphique**.
 
@@ -46,17 +46,17 @@ Le point de départ est une **chaîne ouverte et ordonnée de segments**.
 
 Tous les motifs ne sont cependant pas adaptés à une substitution récursive.
 
-![Exemples de motifs sources pour une construction fractale](docs/images/fractale-motif-source-criteres-construction.png)
+![Critères de construction d'un motif source fractal](docs/images/fractale-motif-source-criteres-construction.png)
 
 *Figure 1 — Exemples de propriétés géométriques à prendre en compte lors de la définition d'un motif source.*
 
 Dans ce modèle, on cherche notamment à disposer :
 
-- d'un contour ouvert ;
-- d'une chaîne continue de segments ;
-- d'un espace suffisant autour du motif ;
-- d'une géométrie limitant les intersections indésirables lors des substitutions ;
-- d'un premier et d'un dernier point clairement identifiés.
+* d'un contour ouvert ;
+* d'une chaîne continue de segments ;
+* d'un espace suffisant autour du motif ;
+* d'une géométrie limitant les intersections indésirables lors des substitutions ;
+* d'un premier et d'un dernier point clairement identifiés.
 
 Le motif retenu peut ensuite être décrit mathématiquement.
 
@@ -82,7 +82,7 @@ Sn-1 = [Mn-1, Mn]
 
 Cette représentation permet de dissocier la géométrie du motif du langage utilisé pour l'afficher.
 
-Le motif d'exemple de ce repository comporte **21 points et 20 segments** :
+Le motif de référence utilisé pour illustrer la méthode comporte **21 points et 20 segments** :
 
 ```text
 M0 → M1 → ... → M20
@@ -138,41 +138,26 @@ xi = αi × length
 yi = βi × length
 ```
 
-Par exemple, si :
+Par exemple :
 
 ```text
 M7 = (1/8, 7/12)
 ```
 
-alors ses coordonnées géométriques sont :
+correspond à :
 
 ```text
 x7 = length / 8
 y7 = 7 × length / 12
 ```
 
-Le motif peut donc être agrandi ou réduit sans modifier son dictionnaire de proportions.
+Le motif peut ainsi être agrandi, réduit, translaté ou projeté dans différentes surfaces graphiques sans modifier son dictionnaire géométrique.
 
 ---
 
-# 4. Translation vers une surface graphique
+# 4. Projection vers une surface graphique
 
-Une surface graphique utilise généralement son coin supérieur gauche comme origine.
-
-On introduit donc deux paramètres :
-
-```text
-offsetX
-offsetY
-```
-
-Pour un point normalisé :
-
-```text
-Mi = (αi, βi)
-```
-
-ses coordonnées d'affichage deviennent :
+Dans une représentation graphique classique dont l'origine se trouve dans le coin supérieur gauche :
 
 ```text
 Xi = offsetX + αi × length
@@ -181,36 +166,23 @@ Yi = offsetY - βi × length
 
 soit :
 
-\[
+[
 X_i = offsetX + \alpha_i L
-\]
+]
 
-\[
+[
 Y_i = offsetY - \beta_i L
-\]
+]
 
-Le signe négatif sur l'axe `Y` permet de conserver une définition géométrique où les valeurs positives montent, alors que les coordonnées écran augmentent généralement vers le bas.
+Le signe négatif sur `Y` permet de conserver une définition mathématique où les coordonnées positives montent, alors que les coordonnées écran augmentent généralement vers le bas.
 
-Le même dictionnaire peut ainsi être utilisé avec différentes tailles de fenêtre et différents moteurs graphiques.
+Les implémentations actuelles effectuent également un **centrage et une mise à l'échelle automatiques** de la fractale finale afin que les motifs de proportions différentes restent visibles dans la fenêtre.
 
 ---
 
 # 5. Dictionnaire JSON du motif
 
-La définition du motif d'exemple est stockée dans :
-
-```text
-patterns/reference-pattern.json
-```
-
-Le dictionnaire contient notamment :
-
-- les paramètres généraux ;
-- les coordonnées normalisées ;
-- les formules proportionnelles à `length` ;
-- l'origine et l'extrémité du motif ;
-- les segments ;
-- les relations de symétrie.
+La géométrie d'un motif est stockée dans un fichier JSON.
 
 Exemple simplifié :
 
@@ -242,7 +214,16 @@ Exemple simplifié :
 }
 ```
 
-Cette séparation est importante :
+Le dictionnaire peut notamment contenir :
+
+* les paramètres généraux ;
+* les coordonnées normalisées ;
+* les formules proportionnelles à `length` ;
+* l'origine et l'extrémité ;
+* la chaîne de segments ;
+* les éventuelles relations de symétrie.
+
+La séparation entre données et moteur est volontaire :
 
 ```text
 JSON
@@ -262,31 +243,31 @@ effectuent le rendu
 
 # 6. Symétrie du motif de référence
 
-L'axe de symétrie est défini par :
+L'axe de symétrie du motif de référence est :
 
-\[
+[
 x = \frac{L}{2}
-\]
+]
 
 Dans l'espace normalisé :
 
-\[
+[
 x = \frac{1}{2}
-\]
+]
 
 Pour un point :
 
-\[
+[
 P=(x,y)
-\]
+]
 
 son symétrique est :
 
-\[
+[
 P'=(1-x,y)
-\]
+]
 
-Le motif de référence utilise notamment les correspondances :
+Les correspondances du motif de référence sont notamment :
 
 ```text
 M9  ↔ M11
@@ -315,14 +296,14 @@ Pour un segment :
 A → B
 ```
 
-le motif de référence doit être transformé de façon à faire correspondre :
+le motif normalisé est transformé de façon à faire correspondre :
 
 ```text
-M0  → A
-M20 → B
+M0 → A
+Mn → B
 ```
 
-Cette opération nécessite principalement :
+Cette opération combine :
 
 ```text
 translation
@@ -330,11 +311,11 @@ translation
 + changement d'échelle
 ```
 
-Le motif obtenu remplace alors le segment initial.
+Le motif transformé remplace alors le segment initial.
 
 ---
 
-# 8. Itération
+# 8. Itération fractale
 
 La substitution peut être appliquée récursivement.
 
@@ -366,29 +347,233 @@ nouvelle substitution
 Niveau n
 ```
 
-Le nombre de segments augmente ainsi à chaque itération.
-
----
-
-# 9. Implémentations
-
-Le même modèle géométrique sera utilisé pour plusieurs démonstrations.
+Si un motif comporte `s` segments, l'ordre `n` peut produire jusqu'à :
 
 ```text
-patterns/reference-pattern.json
-              │
-              ├── C++ / SFML
-              │
-              ├── Python / Turtle
-              │
-              └── JavaScript
+s^n segments
 ```
 
-L'objectif est de montrer que la définition du motif et le processus de construction restent indépendants du langage de programmation.
+Le coût augmente donc très rapidement avec l'ordre d'itération.
+
+La version **Python / Turtle** est volontairement limitée aux ordres `1 à 3` pour conserver une exécution stable.
+
+La version **C++ / SFML 3** peut gérer des ordres supérieurs selon la complexité du motif et les ressources disponibles.
 
 ---
 
-# Structure du repository
+# 9. Les huit motifs élémentaires
+
+Le repository contient huit motifs sources permettant de tester le même moteur fractal avec différentes géométries.
+
+| Élément | Fichier JSON             |
+| ------- | ------------------------ |
+| Eau     | `water-pattern.json`     |
+| Feu     | `fire-pattern.json`      |
+| Vent    | `wind-pattern.json`      |
+| Bois    | `wood-pattern.json`      |
+| Terre   | `earth-pattern.json`     |
+| Glace   | `ice-pattern.json`       |
+| Magmat  | `magma-pattern.json`     |
+| Foudre  | `lightning-pattern.json` |
+
+Ces fichiers suivent tous la même convention :
+
+```text
+M0 = origine du motif
+Mn = extrémité du motif
+Mn normalisé en (1, 0)
+```
+
+Les coordonnées intermédiaires sont exprimées relativement à `length`.
+
+---
+
+## Tester un motif
+
+Les programmes sont conçus pour utiliser **un seul fichier JSON actif dans le dossier `patterns/`**.
+
+Pour tester un autre motif :
+
+1. choisir l'un des huit fichiers JSON ;
+2. conserver uniquement le fichier à tester dans le dossier `patterns/` utilisé par le programme ;
+3. retirer ou déplacer le motif précédent ;
+4. relancer le programme.
+
+Aucune modification de l'algorithme fractal n'est nécessaire.
+
+```text
+water-pattern.json
+        ↓
+même moteur
+
+fire-pattern.json
+        ↓
+même moteur
+
+wind-pattern.json
+        ↓
+même moteur
+
+...
+```
+
+Le changement de JSON modifie uniquement la géométrie utilisée pour les substitutions.
+
+---
+
+# 10. Implémentation C++ / SFML 3
+
+Le code C++ se trouve dans :
+
+```text
+cpp-sfml/
+```
+
+Architecture principale :
+
+```text
+Point
+ ↓
+Segment
+ ↓
+Pattern
+ ↓
+Transform
+ ↓
+FractalGenerator
+ ↓
+Renderer
+ ↓
+SFML 3
+```
+
+Le programme :
+
+* charge le JSON ;
+* génère les différents ordres de fractale ;
+* calcule automatiquement les limites géométriques ;
+* adapte l'échelle ;
+* centre la fractale dans la fenêtre ;
+* joue les différents niveaux sous forme d'animation.
+
+## Première compilation
+
+Depuis `cpp-sfml/` :
+
+```powershell
+cmake -S . -B build
+cmake --build build --config Debug
+```
+
+Puis :
+
+```powershell
+.\build\Debug\FractalDemo.exe
+```
+
+## Tester un autre JSON
+
+Après la compilation initiale, il n'est pas nécessaire de reconstruire le programme si seul le fichier JSON change.
+
+Remplacez le fichier actif dans `patterns/`, puis relancez :
+
+```powershell
+.\build\Debug\FractalDemo.exe
+```
+
+Le nouveau motif est lu au démarrage du programme.
+
+---
+
+# 11. Implémentation Python / Turtle
+
+La version Python se trouve dans :
+
+```text
+python-turtle/
+```
+
+Elle reprend volontairement le même processus avec une implémentation plus compacte :
+
+```text
+JSON
+ ↓
+points normalisés
+ ↓
+substitution
+ ↓
+génération fractale
+ ↓
+centrage automatique
+ ↓
+Turtle
+```
+
+Depuis `python-turtle/` :
+
+```powershell
+python main.py
+```
+
+La démonstration boucle automatiquement sur :
+
+```text
+ordre 1
+↓
+ordre 2
+↓
+ordre 3
+↓
+ordre 1
+↓
+...
+```
+
+Turtle est volontairement limité à trois ordres afin d'éviter les ralentissements importants liés au nombre de segments.
+
+## Tester un autre JSON
+
+Remplacez simplement le fichier actif dans `patterns/`, puis relancez :
+
+```powershell
+python main.py
+```
+
+Aucune compilation n'est nécessaire.
+
+---
+
+# 12. Ajouter son propre motif
+
+Le repository n'est pas limité aux huit éléments fournis.
+
+Pour créer un nouveau motif :
+
+1. définir une chaîne ouverte de points ;
+2. choisir `M0` comme origine ;
+3. définir le dernier point sur `(1, 0)` dans l'espace normalisé ;
+4. exprimer les autres points relativement à `length` ;
+5. créer la liste ordonnée des segments ;
+6. enregistrer le résultat dans un fichier JSON compatible ;
+7. remplacer le fichier actif dans `patterns/`.
+
+Le moteur fractal reste inchangé.
+
+```text
+Nouveau JSON
+     ↓
+Pattern
+     ↓
+Transform
+     ↓
+FractalGenerator
+     ↓
+Renderer
+```
+
+---
+
+# 13. Structure du repository
 
 ```text
 Un-modele-fractale-universel/
@@ -396,22 +581,92 @@ Un-modele-fractale-universel/
 ├── README.md
 ├── LICENSE
 │
-├── docs/
-│   └── images/
-│       ├── fractale-motif-source-criteres-construction.png
-│       └── fractale-motif-source-coordonnees-proportions.png
+├── cpp-sfml/
+│   ├── CMakeLists.txt
+│   │
+│   ├── includes/
+│   │   ├── Point.hpp
+│   │   ├── Segment.hpp
+│   │   ├── Pattern.hpp
+│   │   ├── Transform.hpp
+│   │   ├── FractalGenerator.hpp
+│   │   └── Renderer.hpp
+│   │
+│   └── src/
+│       ├── main.cpp
+│       ├── Pattern.cpp
+│       ├── Transform.cpp
+│       ├── FractalGenerator.cpp
+│       └── Renderer.cpp
+│
+├── python-turtle/
+│   └── main.py
 │
 ├── patterns/
-│   └── reference-pattern.json
+│   ├── reference-pattern.json
+│   ├── water-pattern.json
+│   ├── fire-pattern.json
+│   ├── wind-pattern.json
+│   ├── wood-pattern.json
+│   ├── earth-pattern.json
+│   ├── ice-pattern.json
+│   ├── magma-pattern.json
+│   └── lightning-pattern.json
 │
-├── cpp/
-│   ├── CMakeLists.txt
-│   └── src/
-│       └── main.cpp
-│
-└── python/
-    └── main.py
+└── docs/
+    ├── images/
+    │   ├── fractale-motif-source-criteres-construction.png
+    │   └── fractale-motif-source-coordonnees-proportions.png
+    │
+    └── videos/
+        ├── fractal-animation-cpp-sfml3.mp4
+        └── fractal-animation-python-turtle.mp4
 ```
+
+---
+
+# 14. Démonstrations vidéo
+
+## C++ / SFML 3
+
+[▶ Voir l'animation C++ / SFML 3](docs/videos/fractal-animation-cpp-sfml3.mp4)
+
+La démonstration montre l'évolution automatique du nombre d'itérations avec un rendu graphique accéléré par SFML.
+
+## Python / Turtle
+
+[▶ Voir l'animation Python / Turtle](docs/videos/fractal-animation-python-turtle.mp4)
+
+La démonstration reproduit le même principe avec Turtle et boucle volontairement sur les ordres `1 à 3`.
+
+---
+
+# 15. Principe d'indépendance du modèle
+
+L'objectif principal du repository est de montrer que les motifs, les transformations et les technologies de rendu peuvent rester découplés.
+
+```text
+              Motif JSON
+                   │
+                   ▼
+          Géométrie normalisée
+                   │
+                   ▼
+        Transformation des segments
+                   │
+                   ▼
+          Substitution récursive
+             ┌─────┴─────┐
+             ▼           ▼
+        C++ / SFML    Python / Turtle
+             │           │
+             ▼           ▼
+          animation   animation
+```
+
+Les huit éléments ne constituent donc pas huit programmes différents.
+
+Ils représentent **huit dictionnaires géométriques interprétés par le même processus fractal**.
 
 ---
 
@@ -419,4 +674,4 @@ Un-modele-fractale-universel/
 
 Ce projet est distribué sous **licence MIT**.
 
-Les exemples et modèles peuvent être utilisés, modifiés et redistribués conformément aux conditions de la licence.
+Les exemples, fichiers JSON et implémentations peuvent être utilisés, modifiés et redistribués conformément aux conditions de la licence.
